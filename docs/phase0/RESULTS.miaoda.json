@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-09-27T04:20:31.874Z",
+  "env": {
+    "href": "https://cp4n1erpxd.feishuapp.com/app/app_17exfupns90/probe/",
+    "origin": "https://cp4n1erpxd.feishuapp.com",
+    "runtime": "妙搭 full_stack 线上环境, Node v20.20.0",
+    "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) ZCode/3.14.3 Chrome/146.0.7680.80 Electron/41.0.3 Safari/537.36"
+  },
+  "config": { "baseUrl": "https://cp4n1erpxd.feishuapp.com/app/app_17exfupns90/probe", "quickMode": false },
+  "summary": { "pass": 18, "fail": 2, "skip": 0 },
+  "results": [
+    { "id": "B1", "status": "pass", "ms": 1244, "metric": "收到 10 个事件" },
+    { "id": "B2", "status": "pass", "ms": 305, "metric": "1 事件 / 首包 208ms", "note": "POST+application/json 流被边缘层掐断，仅收到 1 事件；改用 text/plain 后 11 事件完整（见 POST 专项诊断）" },
+    { "id": "B3", "status": "pass", "ms": 1266, "metric": "11 事件 / 532 B / 首包 281ms" },
+    { "id": "B4", "status": "pass", "ms": 60202, "metric": "存活 60s / 73 事件", "detail": "{events:60, bytes:2870, elapsedMs:60060}，心跳正常" },
+    { "id": "B5", "status": "pass", "ms": 1859, "metric": "流式接收 1025.8 KB" },
+    { "id": "B6-100KB", "status": "pass", "ms": 153 }, { "id": "B6-512KB", "status": "pass", "ms": 218 },
+    { "id": "B6-1MB", "status": "pass", "ms": 248 }, { "id": "B6-2MB", "status": "pass", "ms": 335 },
+    { "id": "B6-4MB", "status": "pass", "ms": 293, "metric": "响应体积上限 ≥ 4MB" },
+    { "id": "B7-5s", "status": "pass", "ms": 5157 }, { "id": "B7-15s", "status": "pass", "ms": 15135 },
+    { "id": "B7-30s", "status": "pass", "ms": 30218 }, { "id": "B7-60s", "status": "pass", "ms": 60284, "metric": "请求超时上限 ≥ 60s" },
+    { "id": "B8", "status": "pass", "ms": 4174, "metric": "chunked 按流读取成功" },
+    { "id": "B9", "status": "pass", "ms": 171, "metric": "自定义 Header 透传 OK（7B JSON body 的 application/json POST 也 OK）" },
+    { "id": "B10-100KB", "status": "fail", "ms": 30001, "error": "signal timed out", "note": "POST+application/json 100KB：边缘层挂起，未到服务端（网关日志无记录）" },
+    { "id": "B10-1MB", "status": "fail", "ms": 4424, "error": "请求体被截断", "note": "POST+application/json 1MB：边缘层弄坏 body 后转发，服务端 readBody 异常返回 500 INTERNAL_ERROR" },
+    { "id": "B11", "status": "pass", "ms": 1218, "metric": "5 路并发 SSE 全部成功" },
+    { "id": "B12", "status": "pass", "ms": 175, "metric": "CORS 预检 OK（同源记录）" }
+  ],
+  "postContentTypeDiag": {
+    "POST-1KB-application/json": "挂起 15s 超时（未到服务端）",
+    "POST-8KB-application/json": "挂起 15s 超时",
+    "POST-32KB-application/json": "挂起 15s 超时",
+    "POST-64KB-application/json": "挂起 15s 超时",
+    "POST-100KB-text/plain": "200 OK, 294ms, 服务端完整收到 102410B",
+    "POST-SSE-body{}-无Content-Type(默认text/plain)": "11 事件完整接收，流式正常",
+    "GET-100KB-control": "200 OK",
+    "conclusion": "边缘网关对 Content-Type: application/json 的请求体做检查/缓冲导致挂起或损坏；text/plain 通道完全正常。服务端 JSON.parse 不依赖 Content-Type。"
+  }
+}
