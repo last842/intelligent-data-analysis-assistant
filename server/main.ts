@@ -6,14 +6,17 @@ import { __express as hbsExpressEngine } from 'hbs';
 
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { probeHandler } from './modules/probe/probe.handler';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     abortOnError: process.env.NODE_ENV !== 'development',
   });
-  await configureApp(app, { 
+  await configureApp(app, {
     disableSwagger: true,
   });
+  // Phase 0 能力探针：挂载在 /probe 前缀下，不影响平台 /api 与 SPA 路由
+  app.use('/probe', probeHandler);
   const logger = new Logger('Bootstrap');
   const host = process.env.SERVER_HOST || 'localhost';
   const port = Number(process.env.SERVER_PORT || '3000');
