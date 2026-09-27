@@ -70,7 +70,8 @@ const env = {
   href: location.href, origin: location.origin, ua: navigator.userAgent,
   dpr: devicePixelRatio, language: navigator.language, at: new Date().toISOString(),
 }
-$('#baseUrl').value = location.origin + (/^\/probe\b/.test(location.pathname) ? '/probe' : '')
+const pathProbe = location.pathname.match(/^(.*\/probe)\/?$/)
+$('#baseUrl').value = location.origin + (pathProbe ? pathProbe[1] : '')
 $('#env').textContent = Object.entries(env).map(([k, v]) => `${k}: ${v}`).join('  |  ')
 
 const apiUrl = (p) => $('#baseUrl').value.replace(/\/+$/, '') + p

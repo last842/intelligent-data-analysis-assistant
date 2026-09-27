@@ -15,8 +15,14 @@ async function bootstrap() {
   await configureApp(app, {
     disableSwagger: true,
   });
-  // Phase 0 能力探针：挂载在 /probe 前缀下，不影响平台 /api 与 SPA 路由
-  app.use('/probe', probeHandler);
+  // Phase 0 能力探针：线上请求带 /app/<app_id> 前缀，用包装中间件剥离任意前缀，
+  // 使 /probe 与 /app/<app_id>/probe 都命中探针，且不影响平台 /api 与 SPA 路由
+  app.use((req, res, next) => {
+    const m = /\/probe(\/|$)/.exec(req.url);
+    if (!m) return next();
+    req.url = req.url.slice(m.index);
+    return probeHandler(req, res);
+  });
   const logger = new Logger('Bootstrap');
   const host = process.env.SERVER_HOST || 'localhost';
   const port = Number(process.env.SERVER_PORT || '3000');
