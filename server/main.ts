@@ -20,7 +20,7 @@ async function bootstrap() {
   app.use((req, res, next) => {
     const m = /\/probe(\/|$)/.exec(req.url);
     if (!m) return next();
-    req.url = req.url.slice(m.index);
+    req.url = req.url.slice(m.index + 6) || '/';
     return probeHandler(req, res);
   });
   const logger = new Logger('Bootstrap');
